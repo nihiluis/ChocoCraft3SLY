@@ -42,13 +42,13 @@ public class CommandChocobo extends CommandBase
     @Override
     public String getName()
     {
-        return "chocobo";
+        return "chocobo3sly";
     }
 
     @Override
     public String getUsage(ICommandSender sender)
     {
-        return "/chocobo list\n/chocobo set <trait> <value>";
+        return "/chocobo3sly list\n/chocobo set <trait> <value>";
     }
 
     @Override

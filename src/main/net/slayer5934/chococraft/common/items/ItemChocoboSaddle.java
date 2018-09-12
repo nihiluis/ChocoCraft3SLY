@@ -40,7 +40,7 @@ public class ItemChocoboSaddle extends Item implements IItemModelProvider
         assert rl != null;
 
         // this registers a "blockstate" for our item, which allows different models depending on the variant
-        ResourceLocation loc = new ResourceLocation(rl.getResourceDomain(), "items/" + rl.getResourcePath());
+        ResourceLocation loc = new ResourceLocation(rl.getNamespace(), "items/" + rl.getPath());
         for(SaddleType type : SaddleType.ITEM_META)
         {
             ModelLoader.setCustomModelResourceLocation(this, type.getMeta(), new ModelResourceLocation(loc, "type=" + type.name().toLowerCase()));

@@ -4,46 +4,35 @@ buildscript {
 		maven { url = "http://files.minecraftforge.net/maven" }
 	}
 	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+		classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
 	}
 }
 
-plugins {
-	id 'com.matthewprenger.cursegradle' version '1.0.9'
-}
+apply plugin: "net.minecraftforge.gradle.forge"
+apply plugin: "java"
 
-apply plugin: 'net.minecraftforge.gradle.forge'
-apply from: 'gradle/nonnull.gradle'
+version = "1.0"
+group = "net.slayer5934.chococraft"
 
-def mc_version = "${mc_version_major}.${mc_version_minor}.${mc_version_patch}"
-def mc_version_compat_range = "[${mc_version_major}.${mc_version_minor},${mc_version_major}.${((mc_version_minor.toInteger())+1)})"
-def mc_username = project.hasProperty('dev_username') ? dev_username : "${mod_id}_dev"
-def mc_uuid = project.hasProperty('dev_uuid') ? dev_uuid : mod_id
-def buildNumber = "$System.env.BUILD_NUMBER" != "null" ? "$System.env.BUILD_NUMBER" : "0"
-
-version = "${mod_version_major}.${mod_version_minor}.${mod_version_patch}.${buildNumber}"
-group = "net.slayer5934.${mod_id}"
-archivesBaseName = "${mod_id}_${mc_version}"
-
-sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+sourceCompatibility = targetCompatibility = "1.8"
 compileJava {
-	sourceCompatibility = targetCompatibility = '1.8'
-}
-
-minecraft {
-	version = "${mc_version}-${forge_version}"
-	runDir = "run"
-	mappings = mcp_mappings
-	clientRunArgs = [ "--username ${mc_username}", "--uuid ${mc_uuid}" ]
-
-	replace '@VERSION@', project.version
-	replace '@BUILD_NUMBER@', buildNumber
-	replace '@MC_VERSION@', mc_version_compat_range
-	replace '@CERT_FINGERPRINT@', cert_fingerprint
+	sourceCompatibility = targetCompatibility = "1.8"
 }
 
 repositories {
-	maven { url 'http://dvs1.progwml6.com/files/maven' } // JEI
+	mavenCentral()
+	mavenLocal()
+	jcenter()
+	flatDir {
+		dirs "lib"
+	}
+    maven { url 'http://dvs1.progwml6.com/files/maven' }
+	maven { url = "https://repo.aikar.co/nexus/content/groups/aikar/" }
+}
+
+sourceSets {
+	main.java.srcDirs = ["src/main"]
+	main.resources.srcDirs = ["src/resources"]
 }
 
 dependencies {
@@ -51,59 +40,29 @@ dependencies {
 	runtime "mezz.jei:jei_1.12:4.7.5.85"
 }
 
+minecraft {
+	version = "1.12.2-14.23.2.2611"
+	runDir = "run"
+	mappings = "snapshot_20180720"
+}
+
 processResources {
+	// this will ensure that this task is redone when the versions change.
 	inputs.property "version", project.version
 	inputs.property "mcversion", project.minecraft.version
 
+	// replace stuff in mcmod.info, nothing else
 	from(sourceSets.main.resources.srcDirs) {
-		include 'mcmod.info'
-		expand 'version':project.version, 'mcversion':mc_version_compat_range
+		include "mcmod.info"
+
+		// replace version and mcversion
+		expand "version": project.version, "mcversion": project.minecraft.version
 	}
 
+	// copy everything else except the mcmod.info
 	from(sourceSets.main.resources.srcDirs) {
-		exclude 'mcmod.info'
+		exclude "mcmod.info"
 	}
-	
+
 	rename '(.+_at.cfg)', 'META-INF/$1'
-}
-
-jar {
-	manifest {
-		attributes 'FMLAT': "${mod_id}_at.cfg"
-	}
-	exclude("**/*.db")
-	exclude("**/*.psd")
-}
-
-task signJar(type: SignJar, dependsOn: reobfJar) {
-	inputFile = jar.archivePath
-	outputFile = jar.archivePath
-}
-
-def curse_api_key=""
-
-if(new File("$System.env.confidental_properties").exists()) {
-	println("Found confidenntal gradle properties, loading...")
-	Properties props = new Properties()
-	props.load(new FileInputStream("$System.env.confidental_properties"))
-	signJar.keyStore=props.jarsign_keystore
-	signJar.alias=props.jarsign_keystore_alias
-	signJar.storePass=props.jarsign_keystore_pass
-	signJar.keyPass=props.jarsign_key_pass
-
-	curse_api_key=props.curse_api_key
-
-	build.dependsOn signJar
-}
-
-curseforge {
-	apiKey = curse_api_key
-
-	project {
-		id = "${curse_id}"
-		changelogType = "markdown"
-		changelog = new File('changelog.md')
-		releaseType = mod_version_type
-		mainArtifact jar
-	}
 }

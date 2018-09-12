@@ -17,7 +17,6 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.slayer5934.chococraft.common.ChocoConfig;
 import net.slayer5934.chococraft.common.ChococraftGuiHandler;
 import net.slayer5934.chococraft.common.CommonProxy;
@@ -26,7 +25,6 @@ import net.slayer5934.chococraft.common.entities.EntityChocobo;
 import net.slayer5934.chococraft.common.entities.properties.EntityDataSerializers;
 import net.slayer5934.chococraft.common.init.ModItems;
 import net.slayer5934.chococraft.common.network.PacketManager;
-import net.slayer5934.chococraft.common.world.worldgen.WorldGenGysahlGreen;
 import net.slayer5934.chococraft.utils.Log4jFilter;
 
 @Mod(modid = Chococraft.MODID, version = Chococraft.VERSION, acceptedMinecraftVersions = Chococraft.MC_VERSION)
@@ -46,7 +44,7 @@ public class Chococraft
     public static final CreativeTabs creativeTab = new CreativeTabs(MODID)
     {
         @Override
-        public ItemStack getTabIconItem()
+        public ItemStack createIcon()
         {
             return new ItemStack(ModItems.gysahlGreen);
         }
@@ -66,8 +64,6 @@ public class Chococraft
         PacketManager.init();
         Log4jFilter.init();
 
-        GameRegistry.registerWorldGenerator(new WorldGenGysahlGreen(), ChocoConfig.world.gysahlGreenSpawnWeight);
-        
     	// Attempt at biome spawn fix, as well as being less cluttery.
     	Set<Biome> MrBiomes = new HashSet<>();
 
